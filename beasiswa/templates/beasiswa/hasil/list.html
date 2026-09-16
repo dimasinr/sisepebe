@@ -10,9 +10,13 @@
         <p class="text-sm text-slate-500">Hasil klasifikasi beasiswa berdasarkan data training.</p>
     </div>
     <div class="flex gap-2">
-        <a href="{% url 'beasiswa:export-csv' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all">
+        <a href="{% url 'beasiswa:export-excel' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all">
             <i class="fas fa-file-excel"></i>
-            <span>Excel</span>
+            <span>Excel (.xlsx)</span>
+        </a>
+        <a href="{% url 'beasiswa:export-csv' %}" class="inline-flex items-center gap-2 px-5 py-3 bg-slate-100 text-slate-700 rounded-2xl font-bold hover:bg-slate-200 transition-all shadow-sm">
+            <i class="fas fa-file-csv"></i>
+            <span>CSV</span>
         </a>
         <a href="{% url 'beasiswa:export-print' %}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all shadow-sm">
             <i class="fas fa-print"></i>

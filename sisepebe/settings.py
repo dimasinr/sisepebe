@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-&e(ugtr)lu72c&=+2ydt*5+)dm)mdqzxa(jrr2py3-1es77z+a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -120,3 +120,6 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 LOGIN_URL = 'beasiswa:login'
 LOGIN_REDIRECT_URL = 'beasiswa:dashboard'
 LOGOUT_REDIRECT_URL = 'beasiswa:login'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

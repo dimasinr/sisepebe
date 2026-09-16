@@ -27,6 +27,7 @@ urlpatterns = [
 
     # ---- Seleksi C4.5 ----
     path('siswa/<int:siswa_pk>/seleksi/',views.RunSeleksiView.as_view(),name='run-seleksi'),
+    path('seleksi/batch/', views.RunBatchSeleksiView.as_view(), name='run-batch-seleksi'),
     path('hasil/',views.HasilSeleksiListView.as_view(),name='hasil-list'),
     path('hasil/<int:pk>/',views.HasilSeleksiDetailView.as_view(),name='hasil-detail'),
 
@@ -41,6 +42,7 @@ urlpatterns = [
     path('training/seed/',views.seed_training_data,name='training-seed'),
 
     # ---- Export ----
+    path('export/excel/',views.export_hasil_excel,name='export-excel'),
     path('export/csv/',views.export_hasil_csv,name='export-csv'),
     path('export/print/',views.export_hasil_print,name='export-print'),
 ]

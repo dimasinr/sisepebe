@@ -266,6 +266,56 @@ class RunSeleksiView(LoginRequiredMixin, View):
         return redirect('beasiswa:hasil-detail', pk=siswa.penilaian.hasil_seleksi.pk)
 
 
+class RunBatchSeleksiView(LoginRequiredMixin, View):
+    """Menjalankan algoritma C4.5 secara batch untuk semua siswa yang belum diproses atau seluruh siswa."""
+    login_url = reverse_lazy('beasiswa:login')
+
+    def post(self, request):
+        training_data = DataTraining.objects.all()
+        if training_data.count() < 2:
+            messages.error(request, 'Data training minimal 2 record untuk menjalankan C4.5.')
+            return redirect('beasiswa:training-list')
+
+        mode = request.POST.get('mode', 'unprocessed')
+        qs = PenilaianBeasiswa.objects.select_related('siswa', 'hasil_seleksi')
+        
+        if mode != 'all':
+            qs = qs.filter(hasil_seleksi__isnull=True)
+
+        total_target = qs.count()
+        if total_target == 0:
+            messages.info(request, 'Semua data siswa yang memiliki penilaian sudah diproses.')
+            return redirect('beasiswa:hasil-list')
+
+        diterima = 0
+        ditolak = 0
+
+        for p in qs:
+            hasil = run_seleksi(p, training_data)
+            HasilSeleksi.objects.update_or_create(
+                penilaian=p,
+                defaults={
+                    'status_seleksi' : hasil['status'],
+                    'entropy_awal'   : hasil['entropy_awal'],
+                    'root_node'      : hasil['root_node'],
+                    'rules_json'     : hasil['rules_json'],
+                    'gain_info_json' : hasil['gain_info_json'],
+                    'keterangan'     : f'Dihitung dengan {training_data.count()} data training.',
+                }
+            )
+            if hasil['status'] == 'Diterima':
+                diterima += 1
+            else:
+                ditolak += 1
+
+        messages.success(
+            request,
+            f'Berhasil memproses seleksi C4.5 untuk {total_target} siswa! (Diterima: {diterima}, Ditolak: {ditolak})'
+        )
+        return redirect('beasiswa:hasil-list')
+
+
+
 class HasilSeleksiListView(LoginRequiredMixin, ListView):
     """Menampilkan semua hasil seleksi dengan filter dan pagination."""
     model               = HasilSeleksi
@@ -397,6 +447,159 @@ def export_hasil_csv(request):
             h.tanggal_seleksi.strftime('%d/%m/%Y %H:%M'),
         ])
 
+    return response
+
+
+@login_required(login_url='/login/')
+def export_hasil_excel(request):
+    """Export rekap hasil seleksi lengkap ke format file Excel (.xlsx)."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Hasil Seleksi Beasiswa'
+    ws.views.sheetView[0].showGridLines = True
+
+    # Title Header
+    ws.merge_cells('A1:T1')
+    ws['A1'] = 'REKAPITULASI HASIL SELEKSI BEASISWA (ALGORITMA C4.5)'
+    ws['A1'].font = Font(name='Calibri', size=16, bold=True, color='1E293B')
+    ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+
+    ws.merge_cells('A2:T2')
+    ws['A2'] = 'Data Lengkap Siswa Calon Penerima Beasiswa - Diterima & Ditolak'
+    ws['A2'].font = Font(name='Calibri', size=11, italic=True, color='64748B')
+    ws['A2'].alignment = Alignment(horizontal='center', vertical='center')
+
+    ws.row_dimensions[1].height = 30
+    ws.row_dimensions[2].height = 20
+    ws.row_dimensions[4].height = 28
+
+    headers = [
+        'No', 'NIS', 'Nama Siswa', 'Kelas', 'L/P',
+        'Nilai Rata-rata', 'Kategori Nilai', 'Ranking', 'Kehadiran (%)',
+        'Prestasi', 'Organisasi', 'Penghasilan Ortu', 'Kategori Penghasilan',
+        'Tanggungan', 'Status Rumah', 'KIP', 'Jarak Rumah',
+        'Root Node', 'Status Seleksi', 'Tanggal Seleksi'
+    ]
+
+    header_fill = PatternFill(start_color='1E293B', end_color='1E293B', fill_type='solid')
+    header_font = Font(name='Calibri', size=10, bold=True, color='FFFFFF')
+    header_align = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+    thin_border = Border(
+        left=Side(style='thin', color='CBD5E1'),
+        right=Side(style='thin', color='CBD5E1'),
+        top=Side(style='thin', color='CBD5E1'),
+        bottom=Side(style='thin', color='CBD5E1')
+    )
+
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=4, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_align
+        cell.border = thin_border
+
+    hasil_qs = HasilSeleksi.objects.select_related('penilaian__siswa').order_by('penilaian__siswa__kelas', '-status_seleksi', 'penilaian__ranking_kelas', 'penilaian__siswa__nama')
+
+    fill_diterima = PatternFill(start_color='DCFCE7', end_color='DCFCE7', fill_type='solid')
+    font_diterima = Font(name='Calibri', size=10, bold=True, color='166534')
+
+    fill_ditolak = PatternFill(start_color='FEE2E2', end_color='FEE2E2', fill_type='solid')
+    font_ditolak = Font(name='Calibri', size=10, bold=True, color='991B1B')
+
+    fill_even = PatternFill(start_color='F8FAFC', end_color='F8FAFC', fill_type='solid')
+    fill_white = PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='solid')
+
+    align_center = Alignment(horizontal='center', vertical='center')
+    align_left = Alignment(horizontal='left', vertical='center')
+    align_right = Alignment(horizontal='right', vertical='center')
+
+    row_idx = 5
+    for i, h in enumerate(hasil_qs, 1):
+        p = h.penilaian
+        s = p.siswa
+        
+        row_data = [
+            i,
+            s.nis,
+            s.nama,
+            s.get_kelas_display(),
+            s.get_jenis_kelamin_display(),
+            p.nilai_rata_rata,
+            p.kategori_nilai,
+            p.ranking_kelas,
+            f'{p.persentase_hadir}%',
+            p.get_tingkat_prestasi_display(),
+            p.get_keaktifan_organisasi_display(),
+            p.penghasilan_ortu,
+            p.kategori_penghasilan,
+            p.jumlah_tanggungan,
+            p.get_status_rumah_display(),
+            'Ya' if p.memiliki_kip else 'Tidak',
+            p.get_jarak_rumah_display(),
+            h.root_node,
+            h.status_seleksi,
+            h.tanggal_seleksi.strftime('%d/%m/%Y')
+        ]
+        
+        current_fill = fill_even if row_idx % 2 == 0 else fill_white
+        ws.row_dimensions[row_idx].height = 22
+        
+        for col_num, val in enumerate(row_data, 1):
+            cell = ws.cell(row=row_idx, column=col_num)
+            cell.value = val
+            cell.font = Font(name='Calibri', size=10)
+            cell.fill = current_fill
+            cell.border = thin_border
+            
+            if col_num in [1, 2, 4, 5, 7, 8, 9, 13, 14, 16, 17, 18, 20]:
+                cell.alignment = align_center
+            elif col_num in [6, 12]:
+                cell.alignment = align_right
+                if col_num == 12:
+                    cell.number_format = '#,##0'
+                elif col_num == 6:
+                    cell.number_format = '0.00'
+            else:
+                cell.alignment = align_left
+                
+            if col_num == 19:
+                cell.alignment = align_center
+                if val == 'Diterima':
+                    cell.fill = fill_diterima
+                    cell.font = font_diterima
+                else:
+                    cell.fill = fill_ditolak
+                    cell.font = font_ditolak
+                    
+        row_idx += 1
+
+    for col in ws.columns:
+        max_len = 0
+        col_letter = get_column_letter(col[0].column)
+        for cell in col:
+            if cell.row in [1, 2]:
+                continue
+            val_str = str(cell.value or '')
+            if len(val_str) > max_len:
+                max_len = len(val_str)
+        ws.column_dimensions[col_letter].width = max(max_len + 4, 10)
+
+    ws.column_dimensions['A'].width = 6
+    ws.column_dimensions['B'].width = 14
+    ws.column_dimensions['C'].width = 30
+    ws.column_dimensions['D'].width = 12
+    ws.column_dimensions['L'].width = 18
+    ws.column_dimensions['S'].width = 16
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="rekap_hasil_seleksi_beasiswa.xlsx"'
+    wb.save(response)
     return response
 
 

@@ -10,6 +10,28 @@
     <p class="text-slate-500">Berikut adalah ringkasan data sistem seleksi beasiswa hari ini.</p>
 </div>
 
+{% if total_belum > 0 %}
+<div class="bg-amber-50 border border-amber-200 rounded-3xl p-6 mb-10 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-xl flex-shrink-0">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div>
+            <h4 class="text-base font-bold text-slate-800">Terdapat {{ total_belum }} Siswa yang Belum Diseleksi</h4>
+            <p class="text-xs text-slate-500">Jalankan perhitungan algoritma C4.5 sekarang untuk menentukan rekomendasi penerimaan secara otomatis.</p>
+        </div>
+    </div>
+    <form action="{% url 'beasiswa:run-batch-seleksi' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="unprocessed">
+        <button type="submit" class="px-6 py-3 bg-amber-500 text-white font-bold rounded-2xl hover:bg-amber-600 shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 flex-shrink-0">
+            <i class="fas fa-bolt"></i>
+            <span>Jalankan Seleksi Sekarang</span>
+        </button>
+    </form>
+</div>
+{% endif %}
+
 <!-- Stats Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
     <!-- Total Siswa -->
