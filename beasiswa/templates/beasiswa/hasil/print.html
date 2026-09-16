@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Hasil Seleksi Beasiswa - SISEPEBE</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body { 
+            font-family: 'Times New Roman', Times, serif; 
+            line-height: 1.6; 
+            color: #000; 
+            margin: 0;
+            background: #fff;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            border-bottom: 3px double #000; 
+            padding-bottom: 20px;
+            position: relative;
+        }
+        .header h1 { 
+            margin: 0; 
+            font-size: 18pt; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .header h2 {
+            margin: 5px 0 0;
+            font-size: 14pt;
+            font-weight: normal;
+        }
+        .header p { 
+            margin: 5px 0 0; 
+            font-size: 10pt; 
+            font-style: italic;
+            color: #444;
+        }
+        .doc-title {
+            text-align: center;
+            text-decoration: underline;
+            font-weight: bold;
+            font-size: 12pt;
+            margin: 20px 0;
+            text-transform: uppercase;
+        }
+        .info-print {
+            margin-bottom: 15px;
+            font-size: 9pt;
+            display: flex;
+            justify-content: space-between;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px; 
+            font-size: 9pt; 
+        }
+        th, td { 
+            border: 1px solid #000; 
+            padding: 8px 6px; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #f0f0f0 !important; 
+            -webkit-print-color-adjust: exact;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: bold; }
+        .footer { 
+            margin-top: 50px; 
+            float: right;
+            width: 250px;
+            text-align: center;
+            font-size: 11pt; 
+        }
+        .footer-spacer {
+            height: 80px;
+        }
+        .status-box {
+            display: inline-block;
+            padding: 2px 6px;
+            border: 1px solid #000;
+            font-weight: bold;
+            font-size: 8pt;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; }
+        }
+        .no-print-bar {
+            background: #1e293b;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-print { background: #3b82f6; color: white; }
+        .btn-print:hover { background: #2563eb; }
+        .btn-close { background: #475569; color: white; }
+        .btn-close:hover { background: #334155; }
+    </style>
+</head>
+<body>
+    <div class="no-print no-print-bar">
+        <button onclick="window.print()" class="btn btn-print">
+            <i class="fas fa-print"></i> Cetak Laporan
+        </button>
+        <button onclick="window.close()" class="btn btn-close">Tutup</button>
+    </div>
+
+    <div class="header">
+        <h1>SISTEM SELEKSI PENERIMA BEASISWA (SISEPEBE)</h1>
+        <h2>SMA NEGERI PANGGARANGAN</h2>
+        <p>Jl. Raya Bayah, Kec. Bayah, Kab. Lebak, Banten</p>
+    </div>
+
+    <div class="doc-title">HASIL SELEKSI BEASISWA METODE C4.5</div>
+
+    <div class="info-print">
+        <span>Tahun Ajaran: 2024/2025</span>
+        <span>Dicetak pada: {{ now|date:"d F Y H:i" }} WIB</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 25px;">No</th>
+                <th style="width: 80px;">NIS</th>
+                <th>Nama Siswa</th>
+                <th style="width: 50px;">Kelas</th>
+                <th>Kriteria Utama</th>
+                <th style="width: 100px;">Keputusan Akhir</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in hasil_list %}
+            <tr>
+                <td class="text-center">{{ forloop.counter }}</td>
+                <td class="text-center">{{ h.penilaian.siswa.nis }}</td>
+                <td class="font-bold">{{ h.penilaian.siswa.nama }}</td>
+                <td class="text-center">{{ h.penilaian.siswa.get_kelas_display }}</td>
+                <td>{{ h.root_node }} ({{ h.penilaian.kategori_nilai }})</td>
+                <td class="text-center">
+                    <span class="status-box">
+                        {{ h.status_seleksi|upper }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center italic">Belum ada data hasil seleksi yang tersedia.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Bayah, {{ now|date:"d F Y" }}</p>
+        <p>Panitia Seleksi Beasiswa,</p>
+        <div class="footer-spacer"></div>
+        <p class="font-bold">( ________________________ )</p>
+        <p style="font-size: 9pt;">NIP. ..............................</p>
+    </div>
+</body>
+</html>

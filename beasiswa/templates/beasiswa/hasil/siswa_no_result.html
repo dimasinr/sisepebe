@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menunggu Hasil - SISEPEBE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F172A',
+                        accent: '#3B82F6',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#F8FAFC] font-sans antialiased min-h-screen flex flex-col">
+    
+    <nav class="bg-white border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-accent rounded-xl flex items-center justify-center text-white">
+                    <i class="fas fa-graduation-cap text-lg"></i>
+                </div>
+                <span class="text-xl font-black text-slate-900 tracking-tight">SISEPEBE</span>
+            </div>
+            <form action="{% url 'beasiswa:logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="text-sm font-bold text-slate-500 hover:text-rose-500 transition-colors">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="flex-1 flex items-center justify-center p-6">
+        <div class="max-w-md w-full text-center">
+            <div class="w-32 h-32 bg-amber-50 rounded-[3rem] flex items-center justify-center text-amber-500 text-4xl mb-8 mx-auto border-2 border-amber-100 shadow-xl shadow-amber-500/10">
+                <i class="fas fa-hourglass-half animate-spin-slow"></i>
+            </div>
+            <h2 class="text-3xl font-black text-slate-900 mb-4 tracking-tight">Belum Ada Hasil</h2>
+            <p class="text-slate-500 font-medium mb-10 leading-relaxed">
+                Halo, <b>{{ siswa.nama }}</b>! Data Anda sudah terdaftar di sistem, namun panitia beasiswa belum memproses hasil seleksi untuk Anda. 
+                <br><br>
+                Silakan cek kembali secara berkala.
+            </p>
+            <div class="p-6 bg-blue-50 rounded-[2rem] border border-blue-100 text-left">
+                <h4 class="text-xs font-black text-blue-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i>
+                    Informasi Verifikasi
+                </h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center text-sm font-bold text-blue-800">
+                        <span>Status Data</span>
+                        <span class="px-3 py-1 bg-white rounded-lg text-[10px] uppercase">Terdaftar</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm font-bold text-blue-800">
+                        <span>Kelengkapan</span>
+                        <span class="px-3 py-1 bg-white rounded-lg text-[10px] uppercase">{% if siswa.penilaian %}Lengkap{% else %}Kurang{% endif %}</span>
+                    </div>
+                </div>
+                {% if not siswa.penilaian %}
+                <p class="mt-4 text-[10px] text-blue-500 italic">*) Nilai Anda belum diinput oleh admin sekolah.</p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <style>
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+    </style>
+</body>
+</html>

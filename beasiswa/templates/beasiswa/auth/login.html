@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SISEPEBE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F172A',
+                        accent: '#3B82F6',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#F8FAFC] font-sans antialiased min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-100 rounded-full blur-3xl opacity-50"></div>
+
+    <div class="w-full max-w-md relative z-10">
+        <!-- Brand -->
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-accent rounded-[2rem] shadow-xl shadow-blue-500/30 mb-4 text-white">
+                <i class="fas fa-graduation-cap text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight">SISEPEBE</h1>
+            <p class="text-slate-500 font-medium">Sistem Seleksi Beasiswa Berbasis Website</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white/80 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-2xl border border-white shadow-slate-200/50">
+            <div class="flex gap-4 mb-8 p-1 bg-slate-100 rounded-2xl">
+                <button onclick="switchTab('admin')" id="adminTab" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all bg-white shadow-sm text-slate-800">Administrator</button>
+                <button onclick="switchTab('siswa')" id="siswaTab" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all text-slate-500 hover:text-slate-800">Siswa (NIS)</button>
+            </div>
+
+            <!-- Admin Login Form -->
+            <form id="adminForm" method="post" action="{% url 'beasiswa:login' %}" class="space-y-6">
+                {% csrf_token %}
+                <div class="space-y-2">
+                    <label class="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Username</label>
+                    <div class="relative group">
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-accent transition-colors"></i>
+                        <input type="text" name="username" required placeholder="admin_beasiswa" class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-accent/10 focus:border-accent transition-all">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                    <div class="relative group">
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-accent transition-colors"></i>
+                        <input type="password" name="password" required placeholder="••••••••" class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-accent/10 focus:border-accent transition-all">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-4 bg-accent text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    Sign In Admin
+                </button>
+            </form>
+
+            <!-- Siswa Login Form -->
+            <form id="siswaForm" method="post" action="{% url 'beasiswa:login-siswa' %}" class="space-y-6 hidden">
+                {% csrf_token %}
+                <div class="space-y-2">
+                    <label class="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Nomor Induk Siswa (NIS)</label>
+                    <div class="relative group">
+                        <i class="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-accent transition-colors"></i>
+                        <input type="text" name="nis" required placeholder="Masukkan NIS Anda" class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-accent/10 focus:border-accent transition-all">
+                    </div>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <p class="text-[10px] text-blue-600 font-bold leading-relaxed">
+                        <i class="fas fa-info-circle mr-1"></i> Siswa dapat login hanya menggunakan NIS untuk melihat hasil seleksi beasiswa masing-masing.
+                    </p>
+                </div>
+                <button type="submit" class="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    Cek Hasil Seleksi
+                </button>
+            </form>
+
+            {% if messages %}
+            <div class="mt-6 space-y-2">
+                {% for message in messages %}
+                <div class="text-[11px] font-bold text-center {% if message.tags == 'error' %}text-rose-500{% else %}text-emerald-500{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <p class="text-center mt-10 text-slate-400 text-xs font-medium">
+            &copy; 2024 SMA Negeri SISEPEBE. All rights reserved.
+        </p>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const adminForm = document.getElementById('adminForm');
+            const siswaForm = document.getElementById('siswaForm');
+            const adminTab = document.getElementById('adminTab');
+            const siswaTab = document.getElementById('siswaTab');
+
+            if (tab === 'admin') {
+                adminForm.classList.remove('hidden');
+                siswaForm.classList.add('hidden');
+                adminTab.classList.add('bg-white', 'shadow-sm', 'text-slate-800');
+                adminTab.classList.remove('text-slate-500');
+                siswaTab.classList.remove('bg-white', 'shadow-sm', 'text-slate-800');
+                siswaTab.classList.add('text-slate-500');
+            } else {
+                adminForm.classList.add('hidden');
+                siswaForm.classList.remove('hidden');
+                siswaTab.classList.add('bg-white', 'shadow-sm', 'text-slate-800');
+                siswaTab.classList.remove('text-slate-500');
+                adminTab.classList.remove('bg-white', 'shadow-sm', 'text-slate-800');
+                adminTab.classList.add('text-slate-500');
+            }
+        }
+    </script>
+</body>
+</html>

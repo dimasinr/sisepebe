@@ -1,0 +1,112 @@
+{% extends 'beasiswa/base.html' %}
+
+{% block title %}Hasil Seleksi{% endblock %}
+{% block page_title %}Laporan Hasil Seleksi{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+        <h3 class="text-xl font-bold text-slate-800">Riwayat Seleksi C4.5</h3>
+        <p class="text-sm text-slate-500">Hasil klasifikasi beasiswa berdasarkan data training.</p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'beasiswa:export-csv' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all">
+            <i class="fas fa-file-excel"></i>
+            <span>Excel</span>
+        </a>
+        <a href="{% url 'beasiswa:export-print' %}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold hover:bg-slate-50 transition-all shadow-sm">
+            <i class="fas fa-print"></i>
+            <span>Cetak</span>
+        </a>
+    </div>
+</div>
+
+<!-- Filter Card -->
+<div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-2 relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" name="q" value="{{ query }}" placeholder="Cari nama siswa..." class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all">
+        </div>
+        <div class="relative">
+            <select name="status" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all appearance-none">
+                <option value="">Semua Status</option>
+                <option value="Diterima" {% if status_filter == 'Diterima' %}selected{% endif %}>Diterima</option>
+                <option value="Ditolak" {% if status_filter == 'Ditolak' %}selected{% endif %}>Ditolak</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="flex-1 py-3 bg-slate-800 text-white rounded-2xl font-bold hover:bg-slate-900 transition-all">Filter</button>
+            {% if query or status_filter %}
+            <a href="{% url 'beasiswa:hasil-list' %}" class="px-5 py-3 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 transition-all flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Table Card -->
+<div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-slate-50/50 text-slate-500 text-[11px] uppercase tracking-widest font-black border-b border-slate-100">
+                    <th class="px-8 py-5">No</th>
+                    <th class="px-8 py-5">Siswa</th>
+                    <th class="px-8 py-5">Root Node</th>
+                    <th class="px-8 py-5">Status</th>
+                    <th class="px-8 py-5">Tanggal</th>
+                    <th class="px-8 py-5 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for h in hasil_list %}
+                <tr class="hover:bg-slate-50/50 transition-colors group">
+                    <td class="px-8 py-5 text-sm text-slate-400 font-bold">
+                        {{ forloop.counter|add:page_obj.start_index|add:"-1" }}
+                    </td>
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                                {{ h.penilaian.siswa.nama|first|upper }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">{{ h.penilaian.siswa.nama }}</p>
+                                <p class="text-[11px] text-slate-500 font-medium">{{ h.penilaian.siswa.nis }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-5">
+                        <span class="px-3 py-1 bg-blue-50 text-blue-700 text-[10px] font-black uppercase rounded-lg border border-blue-100">{{ h.root_node }}</span>
+                    </td>
+                    <td class="px-8 py-5">
+                        {% if h.status_seleksi == 'Diterima' %}
+                        <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase rounded-lg border border-emerald-200">Diterima</span>
+                        {% else %}
+                        <span class="px-3 py-1 bg-rose-100 text-rose-700 text-[10px] font-black uppercase rounded-lg border border-rose-200">Ditolak</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-8 py-5 text-sm text-slate-500 font-medium">
+                        {{ h.tanggal_seleksi|date:"d M Y" }}
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                        <a href="{% url 'beasiswa:hasil-detail' h.pk %}" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 text-[10px] font-black uppercase rounded-xl hover:bg-accent hover:text-white transition-all shadow-sm">
+                            <i class="fas fa-microchip"></i>
+                            Analisis
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-8 py-32 text-center text-slate-400 font-medium italic">
+                        Belum ada data hasil seleksi yang diproses.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

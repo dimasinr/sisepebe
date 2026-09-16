@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SISEPEBE{% endblock %} - Sistem Seleksi Beasiswa</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F172A',
+                        accent: '#3B82F6',
+                        surface: '#F8FAFC',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .sidebar-transition { transition: all 0.3s ease-in-out; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+        .nav-link-active { @apply bg-accent text-white shadow-lg shadow-blue-500/30; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-surface text-slate-900 font-sans antialiased">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-primary text-white flex-shrink-0 sidebar-transition hidden md:flex flex-col">
+            <div class="p-6 flex flex-col items-center border-b border-slate-700/50">
+                <div class="w-12 h-12 bg-accent rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-blue-500/40">
+                    <i class="fas fa-graduation-cap text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">SMAN 4 PANGGARANGAN</h1>
+                <p class="text-xs text-slate-400 font-medium">Sistem Seleksi Penerimaan Beasiswa</p>
+            </div>
+
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                <a href="{% url 'beasiswa:dashboard' %}" class="flex items-center px-4 py-3 rounded-xl transition-all group {% if request.resolver_match.url_name == 'dashboard' %}bg-accent text-white shadow-lg shadow-blue-500/20{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+                    <i class="fas fa-th-large w-6 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                
+                <a href="{% url 'beasiswa:siswa-list' %}" class="flex items-center px-4 py-3 rounded-xl transition-all group {% if 'siswa' in request.path %}bg-accent text-white shadow-lg shadow-blue-500/20{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+                    <i class="fas fa-user-graduate w-6 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Data Siswa</span>
+                </a>
+
+                <a href="{% url 'beasiswa:training-list' %}" class="flex items-center px-4 py-3 rounded-xl transition-all group {% if 'training' in request.path %}bg-accent text-white shadow-lg shadow-blue-500/20{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+                    <i class="fas fa-database w-6 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Data Training</span>
+                </a>
+
+                <a href="{% url 'beasiswa:hasil-list' %}" class="flex items-center px-4 py-3 rounded-xl transition-all group {% if 'hasil' in request.path %}bg-accent text-white shadow-lg shadow-blue-500/20{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+                    <i class="fas fa-clipboard-check w-6 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Hasil Seleksi</span>
+                </a>
+            </nav>
+
+            <div class="p-6 border-t border-slate-700/50">
+                <form action="{% url 'beasiswa:logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all font-semibold">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden">
+            <!-- Header -->
+            <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0 z-10">
+                <div class="flex items-center gap-4">
+                    <button id="mobileMenuBtn" class="md:hidden text-slate-600 hover:text-accent">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h2 class="text-xl font-semibold text-slate-800 hidden md:block">{% block page_title %}Overview{% endblock %}</h2>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-3 px-4 py-2 bg-slate-100 rounded-2xl border border-slate-200">
+                        <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-white font-bold">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <div class="flex flex-col leading-none">
+                            <span class="text-sm font-bold text-slate-800">{{ user.username }}</span>
+                            <span class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Administrator</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-8 bg-surface">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="mb-8 space-y-3">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-2xl flex items-center justify-between {% if message.tags == 'success' %}bg-emerald-50 text-emerald-700 border border-emerald-100{% elif message.tags == 'error' %}bg-rose-50 text-rose-700 border border-rose-100{% else %}bg-blue-50 text-blue-700 border border-blue-100{% endif %} shadow-sm animate-fade-in">
+                        <div class="flex items-center gap-3">
+                            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} text-lg"></i>
+                            <p class="font-medium">{{ message }}</p>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="opacity-50 hover:opacity-100 transition-opacity">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+            const sidebar = $('#sidebar');
+            const overlay = $('#sidebarOverlay');
+            
+            $('#mobileMenuBtn').on('click', function () {
+                sidebar.removeClass('hidden').addClass('fixed inset-y-0 left-0 z-50 flex');
+                overlay.removeClass('hidden');
+            });
+            
+            overlay.on('click', function () {
+                sidebar.addClass('hidden').removeClass('fixed inset-y-0 left-0 z-50 flex');
+                overlay.addClass('hidden');
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

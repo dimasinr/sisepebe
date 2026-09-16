@@ -1,0 +1,35 @@
+{% extends 'beasiswa/base.html' %}
+
+{% block title %}Hapus Data Training{% endblock %}
+{% block page_title %}Konfirmasi Hapus{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto py-12">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+        <div class="p-8 text-center">
+            <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-trash-alt text-3xl"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Hapus Data Training</h3>
+            <p class="text-slate-500 mb-6 font-medium leading-relaxed">Apakah Anda yakin ingin menghapus data training ID <span class="font-bold text-slate-800">#{{ object.id }}</span>?</p>
+            
+            <div class="p-4 bg-slate-50 rounded-2xl mb-8 border border-slate-100 text-sm font-medium text-slate-600">
+                {{ object.nilai }} | {{ object.prestasi }} | {{ object.penghasilan }} | {{ object.kip }} &rarr; <span class="font-black text-accent">{{ object.hasil }}</span>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="flex flex-col gap-3">
+                    <button type="submit" class="w-full py-4 bg-rose-500 text-white rounded-2xl font-bold shadow-lg shadow-rose-500/30 hover:bg-rose-600 transition-all">
+                        Ya, Hapus Sekarang
+                    </button>
+                    <a href="{% url 'beasiswa:training-list' %}" class="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all text-center">
+                        Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

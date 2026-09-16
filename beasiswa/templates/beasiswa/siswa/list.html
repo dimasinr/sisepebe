@@ -1,0 +1,160 @@
+{% extends 'beasiswa/base.html' %}
+
+{% block title %}Data Siswa{% endblock %}
+{% block page_title %}Manajemen Data Siswa{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+        <h3 class="text-xl font-bold text-slate-800">Daftar Seluruh Siswa</h3>
+        <p class="text-sm text-slate-500">Total {{ siswa_list|length }} siswa terdaftar dalam sistem.</p>
+    </div>
+    <a href="{% url 'beasiswa:siswa-create' %}" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-600 transition-all">
+        <i class="fas fa-plus"></i>
+        <span>Tambah Siswa Baru</span>
+    </a>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-8">
+    <form method="get" class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1 relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" name="q" value="{{ query }}" placeholder="Cari berdasarkan Nama atau NIS..." class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all">
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="px-8 py-3 bg-slate-800 text-white rounded-2xl font-bold hover:bg-slate-900 transition-all">Cari</button>
+            {% if query %}
+            <a href="{% url 'beasiswa:siswa-list' %}" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all flex items-center justify-center">
+                <i class="fas fa-undo"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Table Card -->
+<div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-slate-50/50 text-slate-500 text-[11px] uppercase tracking-widest font-black border-b border-slate-100">
+                    <th class="px-8 py-5">Siswa</th>
+                    <th class="px-8 py-5">Kelas</th>
+                    <th class="px-8 py-5">Penilaian</th>
+                    <th class="px-8 py-5">Hasil Seleksi</th>
+                    <th class="px-8 py-5 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for s in siswa_list %}
+                <tr class="hover:bg-slate-50/50 transition-colors group">
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">
+                                {{ s.nama|first|upper }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">{{ s.nama }}</p>
+                                <p class="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{{ s.nis }} • {{ s.get_jenis_kelamin_display }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-8 py-5">
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase rounded-lg border border-slate-200">{{ s.get_kelas_display }}</span>
+                    </td>
+                    <td class="px-8 py-5">
+                        {% if s.penilaian %}
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <span class="text-xs font-bold text-emerald-600">Lengkap</span>
+                            <a href="{% url 'beasiswa:penilaian-edit' s.penilaian.pk %}" class="text-slate-400 hover:text-accent ml-1 transition-colors">
+                                <i class="fas fa-edit text-xs"></i>
+                            </a>
+                        </div>
+                        {% else %}
+                        <a href="{% url 'beasiswa:penilaian-create' s.pk %}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-600 text-[10px] font-black uppercase rounded-lg border border-amber-200 hover:bg-amber-500 hover:text-white transition-all">
+                            <i class="fas fa-plus-circle"></i>
+                            Input Nilai
+                        </a>
+                        {% endif %}
+                    </td>
+                    <td class="px-8 py-5">
+                        {% if s.penilaian.hasil_seleksi %}
+                            {% if s.penilaian.hasil_seleksi.status_seleksi == 'Diterima' %}
+                            <div class="flex flex-col">
+                                <span class="text-xs font-black text-emerald-600 uppercase tracking-tighter">DITERIMA</span>
+                                <a href="{% url 'beasiswa:hasil-detail' s.penilaian.hasil_seleksi.pk %}" class="text-[10px] text-slate-400 font-bold hover:text-accent">Lihat Detail &rarr;</a>
+                            </div>
+                            {% else %}
+                            <div class="flex flex-col">
+                                <span class="text-xs font-black text-rose-600 uppercase tracking-tighter">DITOLAK</span>
+                                <a href="{% url 'beasiswa:hasil-detail' s.penilaian.hasil_seleksi.pk %}" class="text-[10px] text-slate-400 font-bold hover:text-accent">Lihat Detail &rarr;</a>
+                            </div>
+                            {% endif %}
+                        {% elif s.penilaian %}
+                        <form action="{% url 'beasiswa:run-seleksi' s.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-[10px] font-black uppercase rounded-xl shadow-lg shadow-blue-500/20 hover:scale-105 transition-all">
+                                <i class="fas fa-bolt"></i>
+                                Proses C4.5
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-xs text-slate-300 font-medium italic">Menunggu Penilaian</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                        <div class="flex justify-end gap-2">
+                            <a href="{% url 'beasiswa:siswa-edit' s.pk %}" class="w-9 h-9 flex items-center justify-center bg-slate-50 text-slate-500 rounded-xl border border-slate-200 hover:bg-white hover:text-accent hover:border-accent transition-all">
+                                <i class="fas fa-pencil-alt text-xs"></i>
+                            </a>
+                            <a href="{% url 'beasiswa:siswa-delete' s.pk %}" class="w-9 h-9 flex items-center justify-center bg-slate-50 text-slate-500 rounded-xl border border-slate-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-8 py-32 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center text-slate-200 mb-6">
+                                <i class="fas fa-users-slash text-3xl"></i>
+                            </div>
+                            <h4 class="text-xl font-bold text-slate-800 mb-1">Belum Ada Data Siswa</h4>
+                            <p class="text-slate-400 mb-8 max-w-xs mx-auto">Silakan tambahkan data siswa baru untuk memulai proses seleksi beasiswa.</p>
+                            <a href="{% url 'beasiswa:siswa-create' %}" class="px-8 py-3 bg-accent text-white rounded-2xl font-bold shadow-lg shadow-blue-500/20">Tambah Siswa</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if is_paginated %}
+    <div class="p-8 border-t border-slate-100 flex items-center justify-center">
+        <nav class="flex gap-1">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-accent hover:text-accent transition-all">
+                <i class="fas fa-chevron-left text-xs"></i>
+            </a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+            <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="w-10 h-10 flex items-center justify-center rounded-xl font-bold transition-all {% if page_obj.number == num %}bg-accent text-white shadow-lg shadow-blue-500/30{% else %}bg-white border border-slate-200 text-slate-600 hover:border-accent hover:text-accent{% endif %}">
+                {{ num }}
+            </a>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:border-accent hover:text-accent transition-all">
+                <i class="fas fa-chevron-right text-xs"></i>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

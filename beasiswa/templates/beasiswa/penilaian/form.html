@@ -1,0 +1,152 @@
+{% extends 'beasiswa/base.html' %}
+
+{% block title %}{{ judul }}{% endblock %}
+{% block page_title %}{{ judul }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'beasiswa:siswa-list' %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-accent hover:border-accent transition-all shadow-sm">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">{{ judul }}</h1>
+                <p class="text-sm text-slate-500 font-medium">Siswa: <span class="text-slate-800 font-bold">{{ siswa.nama }}</span> | NIS: <span class="text-slate-800 font-bold">{{ siswa.nis }}</span></p>
+            </div>
+        </div>
+        
+        <div class="px-4 py-2 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-3">
+            <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-white">
+                <i class="fas fa-info-circle text-xs"></i>
+            </div>
+            <p class="text-[11px] text-blue-800 font-bold uppercase tracking-wider leading-tight">Pastikan data diinput<br>dengan benar</p>
+        </div>
+    </div>
+
+    <form method="post" novalidate class="space-y-8">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Kategori Akademik -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="px-8 py-5 bg-slate-800 text-white flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h5 class="font-bold">Kategori Akademik</h5>
+                </div>
+                <div class="p-8 space-y-6 flex-1">
+                    <div class="space-y-2">
+                        <label for="{{ form.nilai_rata_rata.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.nilai_rata_rata.label }}</label>
+                        {{ form.nilai_rata_rata }}
+                        <p class="text-[10px] text-slate-400 font-medium ml-1">Preprocessing: &ge;90 (Tinggi), 80-89 (Sedang), &lt;80 (Rendah)</p>
+                        {% if form.nilai_rata_rata.errors %}<p class="text-rose-500 text-xs font-medium ml-1">{{ form.nilai_rata_rata.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.ranking_kelas.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.ranking_kelas.label }}</label>
+                        {{ form.ranking_kelas }}
+                        {% if form.ranking_kelas.errors %}<p class="text-rose-500 text-xs font-medium ml-1">{{ form.ranking_kelas.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.persentase_hadir.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.persentase_hadir.label }}</label>
+                        {{ form.persentase_hadir }}
+                        {% if form.persentase_hadir.errors %}<p class="text-rose-500 text-xs font-medium ml-1">{{ form.persentase_hadir.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategori Prestasi -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="px-8 py-5 bg-emerald-600 text-white flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h5 class="font-bold">Kategori Prestasi</h5>
+                </div>
+                <div class="p-8 space-y-6 flex-1">
+                    <div class="space-y-2">
+                        <label for="{{ form.tingkat_prestasi.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.tingkat_prestasi.label }}</label>
+                        {{ form.tingkat_prestasi }}
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.keaktifan_organisasi.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.keaktifan_organisasi.label }}</label>
+                        {{ form.keaktifan_organisasi }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategori Ekonomi -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="px-8 py-5 bg-amber-500 text-white flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h5 class="font-bold">Kategori Ekonomi</h5>
+                </div>
+                <div class="p-8 space-y-6 flex-1">
+                    <div class="space-y-2">
+                        <label for="{{ form.penghasilan_ortu.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.penghasilan_ortu.label }}</label>
+                        {{ form.penghasilan_ortu }}
+                        <p class="text-[10px] text-slate-400 font-medium ml-1">Preprocessing: &lt;2jt (Rendah), 2-4jt (Sedang), &gt;4jt (Tinggi)</p>
+                        {% if form.penghasilan_ortu.errors %}<p class="text-rose-500 text-xs font-medium ml-1">{{ form.penghasilan_ortu.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.jumlah_tanggungan.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.jumlah_tanggungan.label }}</label>
+                        {{ form.jumlah_tanggungan }}
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.status_rumah.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.status_rumah.label }}</label>
+                        {{ form.status_rumah }}
+                    </div>
+                    <div class="pt-2">
+                        <label class="relative inline-flex items-center cursor-pointer group">
+                            {{ form.memiliki_kip }}
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
+                            <span class="ml-3 text-sm font-bold text-slate-700 group-hover:text-accent transition-colors">{{ form.memiliki_kip.label }}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kategori Sosial -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="px-8 py-5 bg-sky-500 text-white flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h5 class="font-bold">Kategori Sosial</h5>
+                </div>
+                <div class="p-8 space-y-6 flex-1">
+                    <div class="space-y-2">
+                        <label for="{{ form.jarak_rumah.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.jarak_rumah.label }}</label>
+                        {{ form.jarak_rumah }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-end gap-3">
+            <a href="{% url 'beasiswa:siswa-list' %}" class="px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all text-center">Batal</a>
+            <button type="submit" class="px-10 py-3 bg-accent text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-save"></i>
+                <span>Simpan Penilaian</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Add Tailwind classes to Django form inputs
+    document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]), select, textarea').forEach(el => {
+        el.classList.add('w-full', 'px-4', 'py-3', 'bg-slate-50', 'border', 'border-slate-200', 'rounded-2xl', 'focus:outline-none', 'focus:ring-2', 'focus:ring-accent/20', 'focus:border-accent', 'transition-all', 'text-slate-800');
+    });
+    
+    // Specifically handle the checkbox/switch
+    const kipCheckbox = document.querySelector('input[type="checkbox"]');
+    if (kipCheckbox) {
+        kipCheckbox.classList.remove('w-full', 'px-4', 'py-3', 'bg-slate-50', 'border', 'border-slate-200', 'rounded-2xl');
+        kipCheckbox.classList.add('sr-only', 'peer');
+    }
+</script>
+{% endblock %}

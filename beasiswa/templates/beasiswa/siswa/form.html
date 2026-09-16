@@ -1,0 +1,91 @@
+{% extends 'beasiswa/base.html' %}
+
+{% block title %}{{ judul }}{% endblock %}
+{% block page_title %}{{ judul }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'beasiswa:siswa-list' %}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-accent hover:border-accent transition-all shadow-sm">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">{{ judul }}</h1>
+            <p class="text-sm text-slate-500">Lengkapi informasi detail siswa di bawah ini.</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-8">
+            <form method="post" novalidate class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="{{ form.nis.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.nis.label }}</label>
+                        {{ form.nis }}
+                        {% if form.nis.errors %}
+                            <p class="text-rose-500 text-xs font-medium ml-1">{{ form.nis.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.nama.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.nama.label }}</label>
+                        {{ form.nama }}
+                        {% if form.nama.errors %}
+                            <p class="text-rose-500 text-xs font-medium ml-1">{{ form.nama.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="{{ form.kelas.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.kelas.label }}</label>
+                        {{ form.kelas }}
+                        {% if form.kelas.errors %}
+                            <p class="text-rose-500 text-xs font-medium ml-1">{{ form.kelas.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-2">
+                        <label for="{{ form.jenis_kelamin.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.jenis_kelamin.label }}</label>
+                        {{ form.jenis_kelamin }}
+                        {% if form.jenis_kelamin.errors %}
+                            <p class="text-rose-500 text-xs font-medium ml-1">{{ form.jenis_kelamin.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="{{ form.alamat.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.alamat.label }}</label>
+                    {{ form.alamat }}
+                    {% if form.alamat.errors %}
+                        <p class="text-rose-500 text-xs font-medium ml-1">{{ form.alamat.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label for="{{ form.no_hp.id_for_label }}" class="text-sm font-bold text-slate-700 ml-1">{{ form.no_hp.label }}</label>
+                    {{ form.no_hp }}
+                    {% if form.no_hp.errors %}
+                        <p class="text-rose-500 text-xs font-medium ml-1">{{ form.no_hp.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="pt-6 flex flex-col md:flex-row justify-end gap-3 border-t border-slate-100">
+                    <a href="{% url 'beasiswa:siswa-list' %}" class="px-8 py-3 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all text-center">Batal</a>
+                    <button type="submit" class="px-10 py-3 bg-accent text-white rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i>
+                        <span>{{ aksi }}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add Tailwind classes to Django form inputs
+    document.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]), select, textarea').forEach(el => {
+        el.classList.add('w-full', 'px-4', 'py-3', 'bg-slate-50', 'border', 'border-slate-200', 'rounded-2xl', 'focus:outline-none', 'focus:ring-2', 'focus:ring-accent/20', 'focus:border-accent', 'transition-all', 'text-slate-800');
+    });
+</script>
+{% endblock %}

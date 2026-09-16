@@ -1,0 +1,41 @@
+{% extends 'beasiswa/base.html' %}
+
+{% block title %}Hapus Siswa{% endblock %}
+{% block page_title %}Konfirmasi Hapus{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto py-12">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+        <div class="p-8 text-center">
+            <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-exclamation-triangle text-3xl"></i>
+            </div>
+            
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Konfirmasi Hapus Data</h3>
+            <p class="text-slate-500 mb-6 font-medium leading-relaxed">Apakah Anda yakin ingin menghapus data siswa:</p>
+            
+            <div class="p-4 bg-slate-50 rounded-2xl mb-8 border border-slate-100">
+                <h4 class="text-xl font-black text-rose-600">{{ object.nama }}</h4>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">{{ object.nis }}</p>
+            </div>
+            
+            <p class="text-sm text-slate-400 mb-8 italic">
+                <i class="fas fa-info-circle mr-1"></i>
+                Tindakan ini tidak dapat dibatalkan. Seluruh data penilaian dan hasil seleksi terkait juga akan terhapus secara permanen.
+            </p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="flex flex-col gap-3">
+                    <button type="submit" class="w-full py-4 bg-rose-500 text-white rounded-2xl font-bold shadow-lg shadow-rose-500/30 hover:bg-rose-600 transition-all">
+                        Ya, Hapus Sekarang
+                    </button>
+                    <a href="{% url 'beasiswa:siswa-list' %}" class="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition-all text-center">
+                        Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
